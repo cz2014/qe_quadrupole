@@ -1,0 +1,44 @@
+&control
+ calculation = "scf"
+ prefix = "inse"
+ pseudo_dir = "./"
+ outdir = "./"
+ verbosity = 'high'
+ wf_collect=.false.
+ etot_conv_thr = 1.0D-6
+ forc_conv_thr = 1.0D-5
+/
+&system
+ ibrav = 4
+ celldm(1) = 7.72712782
+ celldm(3) = 5.966123646
+ nat = 4
+ ntyp = 2
+ ecutwfc = 70.0
+!noncolin = .true.,
+!lspinorb = .true.,
+ nosym = .true.
+/
+&electrons
+ electron_maxstep = 100
+ conv_thr =  1.0e-12
+/
+&ions
+/
+&cell
+   cell_dofree='2Dxy'
+/
+
+ATOMIC_SPECIES
+In    114.818      In_ONCV_PBE-1.2.upf
+Se    78.96        Se_ONCV_PBE-1.2.upf
+
+ATOMIC_POSITIONS crystal
+In            0.3333333300        0.6666666700        0.1772233187
+In            0.3333333300        0.6666666700        0.2931835408
+Se            0.6666666700        0.3333333300        0.1249170331
+Se            0.6666666700        0.3333333300        0.3454898354
+
+K_POINTS automatic
+12 12 1 0 0 0
+

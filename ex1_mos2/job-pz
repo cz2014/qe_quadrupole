@@ -1,0 +1,104 @@
+#!/bin/bash
+#SBATCH -J myjob            # job name
+#SBATCH -o myjob.o%j        # output and error file name (%j expands to jobID)
+#SBATCH -N 2                # number of nodes requested
+#SBATCH -n 112               # total number of mpi tasks requested
+#SBATCH -p small           # queue (partition) -- normal, development, etc.
+#SBATCH -t 03:55:00         # run time (hh:mm:ss) - 1.5 hours
+#SBATCH -A CHE21015
+
+
+#Initialize local varibles
+
+qe67=/work/05852/cz2014/frontera/qe67/q-e-qe-6.7MaX-Release/bin
+qe67full=/home1/05852/cz2014/qe67-full/q-e-qe-6.7.0/bin
+qepz=/work/05852/cz2014/frontera/qe67-pz/q-e-qe-6.7.0/bin
+
+qe=$qepz
+
+prefix=mos2
+
+date
+# run the executable named a.out
+cat > qlist << EOF
+q0 0.0 0.0 0.0
+qx1 0.01 0.0 0.0
+qx2 0.02 0.0 0.0
+qy1 0.0 0.01 0.0
+qy2 0.0 0.02 0.0
+qz1 0.0 0.0 0.01
+qz2 0.0 0.0 0.02
+qxy1 0.01 0.01 0.0
+qxz1 0.01 0.0 0.01
+qyz1 0.0 0.01 0.01
+qx1y2 0.01 0.02 0.0
+qx2y1 0.02 0.01 0.0
+qx1z2 0.01 0.0 0.02
+qx2z1 0.02 0.0 0.01
+qy1z2 0.0 0.01 0.02
+qy2z1 0.0 0.02 0.01
+EOF
+
+cat > ph-pz.in << EOF
+&inputph
+ prefix = "$prefix",
+ epsil = .true.,
+ zeu = .true.,
+ zue = .false.,
+ fildyn = "dyn",
+ fildrho = "drho",
+ tr2_ph = 1.0d-21,
+!ldisp = .true.
+!qplot = .true.
+/
+0.0  0.0  0.0
+EOF
+
+rm -rf dyn_all
+mkdir dyn_all
+
+
+####### do scf and q0 epsil
+ ibrun $qe/pw.x -nk 8 <scf.in> scf.out
+ echo "pw done"
+
+ ibrun $qe/ph.x -nk 8 <ph-pz.in> ph0.out
+ echo "ph epsil done"
+ cp dyn dyn_all/dyn0
+
+####### prepare phhead.in
+cp ph-pz.in ph.in
+sed -i "s/epsil.*$/epsil = .false.,/g" ph.in
+sed -i "s/zeu.*$/zeu = .false.,/g" ph.in
+sed -i "s/zue.*$/zue = .true.,/g" ph.in
+cp ph.in phhead.in
+lq=$(sed -n "/\//=" ph.in)
+lq=$(echo "$lq+1"|bc)
+sed ' '"$lq"',$d ' ph.in > phhead.in
+
+nq=$(wc -l < qlist)
+
+####### do some calculations
+for i in $(seq 1 $nq)
+do
+  fn=$(sed -n "${i}p" qlist | awk '{print $1}')
+  xq=$(sed -n "${i}p" qlist | awk '{print $2, $3, $4}')
+  cp phhead.in phtmp.in
+  echo $xq >> phtmp.in
+
+  tail -n 2 phtmp.in
+
+   rm -rf _ph0
+   ibrun $qe/ph.x -nk 8  <phtmp.in>ph.out
+   echo "$fn done!"
+
+  rm -rf $fn
+  mkdir $fn
+  cp scf.in scf.out  ph.out dyn $fn/
+  cp phtmp.in $fn/ph.in
+
+  cp dyn dyn_all/dyn$i
+done
+
+date
+

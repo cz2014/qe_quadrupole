@@ -1,0 +1,12 @@
+&inputph
+ prefix = "mos2",
+ epsil = .true.,
+ zeu = .true.,
+ zue = .false.,
+ fildyn = "dyn",
+ fildrho = "drho",
+ tr2_ph = 1.0d-21,
+!ldisp = .true.
+!qplot = .true.
+/
+0.0  0.0  0.0

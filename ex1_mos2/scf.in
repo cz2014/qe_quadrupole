@@ -1,0 +1,42 @@
+&control
+ calculation = "scf"
+ prefix = "mos2"
+ pseudo_dir = "./"
+ outdir = "./"
+ verbosity = 'high'
+ wf_collect=.true.
+/
+&system
+ ibrav = 4
+ celldm(1) = 6.0189456
+ celldm(3) = 6.2792597
+ nat = 3
+ ntyp = 2
+ ecutwfc = 90.0
+ nosym = .true.
+!noncolin = .true.,
+!lspinorb = .true.,
+!nbnd = 17
+/
+&electrons
+ electron_maxstep = 100
+ conv_thr =  1.0e-12
+/
+&ions
+/
+&cell
+!  cell_dofree='2Dxy'
+/
+
+ATOMIC_SPECIES
+Mo    95.95       Mo_ONCV_PBE-1.2.upf
+S     32.06       S_ONCV_PBE-1.2.upf
+
+ATOMIC_POSITIONS crystal
+Mo            0.0000000000        0.0000000000        0.1000000000
+S             0.3333333330        0.6666666670        0.0217975158
+S             0.3333333330        0.6666666670        0.1782024842
+
+K_POINTS automatic
+12 12 1 0 0 0
+
